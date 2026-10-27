@@ -115,6 +115,24 @@ runScenario(async ({ js, wait, check }) => {
   await wait(300);
   check(pages.find((p) => p.id === 'p2').due === null, 'removes a date');
 
+  // Moments that are already over cannot be chosen.
+  await js(`$('draftDateButton').click();`);
+  check(await js(`$('prevMonth').disabled`), 'cannot go back to past months');
+  const pastDays = await js(`[...document.querySelectorAll('#calendarGrid button.past')].map((b) => b.disabled)`);
+  check(pastDays.every(Boolean), 'past days cannot be picked');
+  await js(`document.querySelector('[data-pick="today"]').click();
+    $('hasTimeInput').checked = true; $('hasTimeInput').onchange();
+    $('timeInput').value = '00:00'; $('timeInput').oninput();
+    $('confirmDueButton').click();`);
+  check(await js(`!$('pastWarning').hidden && $('confirmDueButton').disabled && !$('datePanel').hidden`),
+    'rejects a time that has already passed today');
+  await js(`$('timeInput').value = '23:59'; $('timeInput').oninput();`);
+  check(await js(`$('pastWarning').hidden && !$('confirmDueButton').disabled`), 'accepts a later time today');
+  await js(`closePicker(); openPicker('p3');`);
+  check(await js(`$('pastWarning').textContent === 'Ese día ya ha pasado' && $('confirmDueButton').disabled`),
+    'an overdue task opens on its day but cannot be saved there');
+  await js(`closePicker();`);
+
   // Context menu.
   await js(`window.salchi.send('task-menu', 'p3')`);
   await wait(200);
