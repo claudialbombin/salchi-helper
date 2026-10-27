@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 300" width="900" height="300" role="img" aria-label="Salchi, a dachshund typing your to-do list"><title>Salchi, a dachshund typing your to-do list</title>
+<style>
+  .tap  { animation: tap .32s steps(1) infinite; }
+  .tap2 { animation: tap .32s steps(1) infinite; animation-delay: -.16s; }
+  @keyframes tap { 0% { transform: translateY(0); } 50% { transform: translateY(3px); } }
+  .wag { transform-box: fill-box; transform-origin: 0% 50%; animation: wag .64s steps(1) infinite; }
+  @keyframes wag { 0% { transform: rotate(-24deg); } 50% { transform: rotate(10deg); } }
+  .blink { transform-box: fill-box; transform-origin: 50% 50%; animation: blink 4.5s infinite; }
+  @keyframes blink { 0%, 93%, 100% { transform: scaleY(1); } 95% { transform: scaleY(.15); } }
+  .steam { animation: steam 2.4s ease-in-out infinite; opacity: 0; }
+  .steam.s2 { animation-delay: -1.2s; }
+  @keyframes steam { 0% { opacity: 0; transform: translateY(4px); } 30% { opacity: .7; } 100% { opacity: 0; transform: translateY(-14px); } }
+  .bob { animation: bob 1.6s ease-in-out infinite; }
+  @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+  .float { animation: float 6s ease-in-out infinite; opacity: 0; }
+  @keyframes float { 0% { opacity: 0; transform: translateY(18px) rotate(-6deg); } 12% { opacity: 1; }
+                     70% { opacity: 1; } 100% { opacity: 0; transform: translateY(-40px) rotate(6deg); } }
+  .tick { stroke-dasharray: 20; stroke-dashoffset: 20; animation: tick 6s ease-out infinite; }
+  @keyframes tick { 0%, 25% { stroke-dashoffset: 20; } 40%, 100% { stroke-dashoffset: 0; } }
+  .pop { transform-box: fill-box; transform-origin: 100% 100%; animation: pop 5s ease-in-out infinite; }
+  @keyframes pop { 0%, 30% { opacity: 0; transform: scale(.4); } 40%, 85% { opacity: 1; transform: scale(1); } 95%, 100% { opacity: 0; transform: scale(.4); } }
+  .pulse { animation: pulse 1.6s ease-in-out infinite; }
+  @keyframes pulse { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
+  .run { animation: run 5s ease-in-out infinite; }
+  @keyframes run { 0%, 8% { transform: translateX(0); } 42%, 58% { transform: translateX(var(--dist)); } 92%, 100% { transform: translateX(0); } }
+  .face { animation: face 5s steps(1) infinite; transform-box: fill-box; transform-origin: 50% 50%; }
+  @keyframes face { 0% { transform: scaleX(1); } 50% { transform: scaleX(-1); } }
+  .legA { transform-box: fill-box; transform-origin: 50% 0%; animation: leg .28s linear infinite alternate; }
+  .legB { transform-box: fill-box; transform-origin: 50% 0%; animation: leg .28s linear infinite alternate-reverse; }
+  @keyframes leg { from { transform: rotate(-28deg); } to { transform: rotate(28deg); } }
+  .drop { animation: drop 3.2s ease-in infinite; }
+  @keyframes drop { 0%, 15% { transform: translateY(0); opacity: 1; } 55% { transform: translateY(42px); opacity: 1; } 65%, 100% { transform: translateY(42px); opacity: 0; } }
+  .lid { transform-box: fill-box; transform-origin: 50% 100%; animation: lid 3.2s ease-in-out infinite; }
+  @keyframes lid { 0%, 10% { transform: rotate(0); } 25%, 55% { transform: rotate(-28deg); } 70%, 100% { transform: rotate(0); } }
+  .spin { transform-box: fill-box; transform-origin: 50% 50%; animation: spin 4s linear infinite; }
+  .spin.rev { animation-direction: reverse; animation-duration: 3s; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .fill { animation: fill 4s ease-in-out infinite; transform-box: fill-box; transform-origin: 0% 50%; }
+  @keyframes fill { 0% { transform: scaleX(0); } 70%, 85% { transform: scaleX(1); } 100% { transform: scaleX(1); opacity: 0; } }
+  .type { animation: type 6s steps(28) infinite; }
+  @keyframes type { 0% { width: 0; } 55%, 100% { width: var(--w); } }
+  .cursor { animation: cursor .8s steps(1) infinite; }
+  @keyframes cursor { 50% { opacity: 0; } }
+  .stick { opacity: 0; animation: stick 7s ease-out infinite; transform-box: fill-box; transform-origin: 50% 0%; }
+  @keyframes stick { 0% { opacity: 0; transform: translateY(-12px) rotate(-10deg); } 6% { opacity: 1; transform: translateY(0) rotate(-3deg); } 85% { opacity: 1; } 95%, 100% { opacity: 0; } }
+  .text { font-family: -apple-system, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; }
+  .mono { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; } .float, .stick, .steam { opacity: 1; } }
+</style><rect x="1" y="1" width="898" height="298" rx="22" fill="#fff8ea" stroke="#ecdcb8" stroke-width="2"/><g opacity=".55"><circle cx="40" cy="30" r="1.6" fill="#e2c98f"/><circle cx="100" cy="38" r="1.6" fill="#e2c98f"/><circle cx="160" cy="46" r="1.6" fill="#e2c98f"/><circle cx="220" cy="30" r="1.6" fill="#e2c98f"/><circle cx="280" cy="38" r="1.6" fill="#e2c98f"/><circle cx="340" cy="46" r="1.6" fill="#e2c98f"/><circle cx="400" cy="30" r="1.6" fill="#e2c98f"/><circle cx="460" cy="38" r="1.6" fill="#e2c98f"/><circle cx="520" cy="46" r="1.6" fill="#e2c98f"/><circle cx="580" cy="30" r="1.6" fill="#e2c98f"/><circle cx="640" cy="38" r="1.6" fill="#e2c98f"/><circle cx="700" cy="46" r="1.6" fill="#e2c98f"/><circle cx="760" cy="30" r="1.6" fill="#e2c98f"/><circle cx="820" cy="38" r="1.6" fill="#e2c98f"/></g><g transform="translate(560 178)"><g class="float" style="animation-delay:0s"><rect width="86" height="40" rx="5" fill="#f7e2a0" stroke="#e8cf7c"/><text x="12" y="25" font-size="13" font-weight="600" class="text" fill="#3b2a1f">buy milk</text></g></g><g transform="translate(650 160)"><g class="float" style="animation-delay:-2s"><rect width="86" height="40" rx="5" fill="#f7e2a0" stroke="#e8cf7c"/><text x="12" y="25" font-size="13" font-weight="600" class="text" fill="#3b2a1f">gym 18:00</text></g></g><g transform="translate(740 190)"><g class="float" style="animation-delay:-4s"><rect width="86" height="40" rx="5" fill="#f7e2a0" stroke="#e8cf7c"/><text x="12" y="25" font-size="13" font-weight="600" class="text" fill="#3b2a1f">call mum</text></g></g><g transform="translate(610 222)"><g class="float" style="animation-delay:-1s"><rect width="86" height="40" rx="5" fill="#f7e2a0" stroke="#e8cf7c"/><text x="12" y="25" font-size="13" font-weight="600" class="text" fill="#3b2a1f">TFG ✓</text></g></g><g transform="translate(90 40) scale(2.1)">
+  <ellipse cx="70" cy="99" rx="62" ry="3.5" fill="rgba(0,0,0,.10)"/>
+  <rect class="wag" x="123" y="43" width="22" height="6" rx="3" fill="#a36130"/>
+  <rect x="40" y="40" width="92" height="28" rx="14" fill="#a36130"/>
+  <rect x="68" y="42" width="56" height="6" rx="3" fill="#6e3d1c" opacity=".22"/>
+  <ellipse cx="27" cy="36" rx="5.5" ry="12.5" fill="#6e3d1c"/>
+  <ellipse cx="57" cy="36" rx="5.5" ry="12.5" fill="#6e3d1c"/>
+  <ellipse cx="42" cy="28" rx="16" ry="14" fill="#a36130"/>
+  <ellipse cx="42" cy="38" rx="9" ry="6" fill="#d6a16b"/>
+  <ellipse cx="42" cy="34" rx="3.5" ry="2.5" fill="#111"/>
+  <g class="blink"><rect x="33" y="22.5" width="4" height="5" rx="2" fill="#111"/><rect x="47" y="22.5" width="4" height="5" rx="2" fill="#111"/></g>
+  <rect x="16" y="69" width="4" height="30" rx="2" fill="#996e45"/>
+  <rect x="120" y="69" width="4" height="30" rx="2" fill="#996e45"/>
+  <rect x="7" y="63.5" width="126" height="7" rx="3" fill="#cc9e6e"/>
+  <path class="steam" d="M101 47 q-3 -5 0 -10 q3 -5 0 -10" fill="none" stroke="#c9b9a6" stroke-width="1.6" stroke-linecap="round"/><path class="steam s2" d="M107 47 q-3 -5 0 -10 q3 -5 0 -10" fill="none" stroke="#c9b9a6" stroke-width="1.6" stroke-linecap="round"/>
+  <rect x="99" y="52.5" width="10" height="11" rx="2" fill="#fff" stroke="#e7d9c4" stroke-width=".8"/>
+  <circle cx="110" cy="58" r="3" fill="none" stroke="#fff" stroke-width="2"/>
+  <rect x="19" y="61.5" width="54" height="3" rx="1" fill="#999"/>
+  <rect x="23" y="41" width="46" height="22" rx="4" fill="#dcdee3"/>
+  <g transform="rotate(-4 46 52)"><rect x="35" y="44.5" width="22" height="15" rx="3" fill="#f7e2a0"/>
+    <text x="46" y="56" text-anchor="middle" font-size="12" font-weight="800" class="text" fill="rgba(0,0,0,.8)">3</text></g>
+  <rect class="tap" x="26.5" y="34" width="9" height="8" rx="4" fill="#a36130"/>
+  <rect class="tap2" x="56.5" y="34" width="9" height="8" rx="4" fill="#a36130"/>
+</g><text x="560" y="78" font-size="54" font-weight="800" class="text" fill="#3b2a1f">Salchi</text><text x="562" y="106" font-size="17" class="text" fill="#7a6555">your to-do list, always in sight</text></svg>
