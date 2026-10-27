@@ -1,0 +1,19 @@
+# macOS
+.DS_Store
+
+# Swift Package Manager build output and packaged apps
+Mac/.build/
+Mac/*.app/
+
+# Electron
+Desktop/node_modules/
+Desktop/dist/
+
+# Installers and shareable builds (too big for git; publish them as release assets instead)
+*.exe
+*.AppImage
+*.deb
+*.zip
+
+# Personal bundle for a friend
+Version Rodri/
