@@ -1,0 +1,27 @@
+{
+  "name": "salchi-desktop",
+  "productName": "Salchi",
+  "version": "1.1.0",
+  "description": "A floating dachshund that keeps your to-do list in sight, for Windows and Linux.",
+  "author": {
+    "name": "Claudia López Bombín",
+    "email": "claudialbombin@users.noreply.github.com"
+  },
+  "homepage": "https://github.com/claudialbombin",
+  "license": "UNLICENSED",
+  "private": true,
+  "main": "src/main/main.js",
+  "edition": "notion",
+  "scripts": {
+    "start": "electron .",
+    "start:local": "electron . --edition=local",
+    "test": "node test/run-e2e.js",
+    "dist:notion": "electron-builder --config build/config.notion.js --win --linux",
+    "dist:local": "electron-builder --config build/config.local.js --win --linux",
+    "dist": "npm run dist:notion && npm run dist:local"
+  },
+  "devDependencies": {
+    "electron": "33.4.11",
+    "electron-builder": "25.1.8"
+  }
+}
