@@ -147,6 +147,11 @@ header .sp { flex: 1; }
                    font-family: inherit; font-size: 12px; cursor: pointer; }
 .cal-grid button:hover { background: var(--hover); }
 .cal-grid button.past { color: var(--muted); }
+.cal-grid button:disabled { opacity: .45; cursor: default; }
+.cal-grid button:disabled:hover { background: none; }
+.cal-nav button:disabled { opacity: .3; cursor: default; }
+.dp-warning { font-size: 11px; color: #d0453a; white-space: nowrap; }
+#confirmDueButton:disabled { opacity: .5; cursor: default; }
 .cal-grid button.today { box-shadow: inset 0 0 0 1.5px #c58b17; font-weight: 700; }
 .cal-grid button.sel { background: var(--highlight); color: #1d1a17; font-weight: 700; }
 .dp-time { display: flex; align-items: center; gap: 10px; font-size: 12px; min-height: 26px; }
@@ -156,6 +161,7 @@ header .sp { flex: 1; }
 #timeInput::-webkit-calendar-picker-indicator { display: none; }
 .dp-actions { display: flex; align-items: center; gap: 8px; margin-top: auto; }
 .dp-actions .sp { flex: 1; }
+.dp-actions .linkbtn { white-space: nowrap; }
 .linkbtn { border: 0; background: none; color: var(--muted); font-family: inherit; font-size: 12px; cursor: pointer; padding: 4px 2px; }
 .linkbtn:hover { color: #c0392b; }
 .primary { border: 0; border-radius: 8px; padding: 6px 16px; background: var(--highlight); color: #1d1a17;
