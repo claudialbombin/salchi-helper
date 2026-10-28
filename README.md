@@ -12,7 +12,7 @@
   <a href="Mac/"><img src="https://img.shields.io/badge/macOS-13%2B-f7e2a0?style=for-the-badge&labelColor=3b2a1f" alt="macOS 13+"></a>
   <a href="Windows/"><img src="https://img.shields.io/badge/Windows-10%20%7C%2011-f7e2a0?style=for-the-badge&labelColor=3b2a1f" alt="Windows 10 and 11"></a>
   <a href="Linux/"><img src="https://img.shields.io/badge/Linux-x64-f7e2a0?style=for-the-badge&labelColor=3b2a1f" alt="Linux x64"></a>
-  <img src="https://img.shields.io/badge/version-1.1.1-a36130?style=for-the-badge&labelColor=3b2a1f" alt="Version 1.1.1">
+  <img src="https://img.shields.io/badge/version-1.2-a36130?style=for-the-badge&labelColor=3b2a1f" alt="Version 1.2">
 </p>
 
 <p align="center">
@@ -34,11 +34,14 @@
 | 🧲 **Stays out of the way** | Drag it anywhere, even flush against the edge of the screen. Pin 📌 the list when you want it open. |
 | 📅 **Due dates** | Give any task a day, and a time if you like. Overdue tasks turn red, today's turn orange, and the list sorts itself. |
 | 🗓️ **Google Calendar** | Dated tasks can show up in your Google Calendar, and disappear when you tick them off. |
+| 🌍 **Speaks your language** | 46 languages, chosen when you install or open it for the first time. |
 | 🤖 **AI can reach it too** | In the Notion edition, an assistant connected to your Notion (like Claude) can add tasks to your list for you. |
 
 > [!NOTE]
-> The app itself speaks Spanish (*"apuntar algo…"*, *"Hecho"*, *"Ponerle fecha"*). These docs are in English and
-> translate the labels where it matters.
+> Salchi speaks **46 languages**: every official EU language, English (US and UK), Catalan, Basque, Galician,
+> Russian, Ukrainian, Turkish, Norwegian, Chinese, Japanese, Korean, Hindi, Bengali, Indonesian, Vietnamese, Thai,
+> Arabic, Hebrew, Persian and Urdu (right-to-left languages mirror the layout). Pick yours in the Windows installer
+> or the first time Salchi opens, and change it whenever you like in ⚙️ settings.
 
 ## 🐾 Two editions
 
@@ -125,8 +128,9 @@ Full guides: [With Notion](Mac/With%20Notion/) · [No Notion](Mac/No%20Notion/)
 
 1. Run `Salchi-Setup-con-Notion.exe` (With Notion) or `Salchi-Setup-sin-Notion.exe` (No Notion).
 2. If SmartScreen says *"Windows protected your PC"*: **More info → Run anyway**.
-3. Salchi appears in the bottom-right corner and starts with Windows from now on.
-4. *With Notion only:* paste your Notion token and page link in ⚙️ settings.
+3. Pick Salchi's language in the menu that appears and press **OK**.
+4. Salchi appears in the bottom-right corner and starts with Windows from now on.
+5. *With Notion only:* paste your Notion token and page link in ⚙️ settings.
 
 Full guides: [With Notion](Windows/With%20Notion/) · [No Notion](Windows/No%20Notion/)
 
@@ -167,7 +171,7 @@ Full guides: [With Notion](Linux/With%20Notion/) · [No Notion](Linux/No%20Notio
 
 - **With Notion:** set up the small script in [`GoogleCalendar`](GoogleCalendar/) once. From then on, every dated
   task appears in a *Salchi 🐕* calendar, and leaves it when you tick it off.
-- **No Notion:** right-click a dated task → **Añadir a Google Calendar** (*Add to Google Calendar*) and press Save.
+- **No Notion:** right-click a dated task → **Add to Google Calendar** and press Save.
 
 </details>
 
@@ -258,6 +262,7 @@ Salchi/
 │   ├── With Notion/  AppImage + .deb + install guide
 │   └── No Notion/    AppImage + .deb + install guide
 ├── GoogleCalendar/   Google Apps Script for calendar sync
+├── locales/          The 46 translations, one JSON file per language, shared by every app
 └── assets/           The animated illustrations used in these READMEs
 ```
 

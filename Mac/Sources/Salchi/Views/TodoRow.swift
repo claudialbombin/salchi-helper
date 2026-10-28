@@ -42,10 +42,10 @@ struct TodoRow: View {
 
             if hovering && !item.isPending {
                 hoverButton(item.due == nil ? "calendar.badge.plus" : "calendar",
-                            help: item.due == nil ? "Ponerle fecha" : "Cambiar fecha",
+                            help: item.due == nil ? tr("task.addDate") : tr("task.changeDate"),
                             action: onPickDate)
                 if let onDelete {
-                    hoverButton("xmark", help: "Borrar", action: onDelete)
+                    hoverButton("xmark", help: tr("task.delete"), action: onDelete)
                 }
             }
         }
@@ -59,29 +59,29 @@ struct TodoRow: View {
     /// Right-click menu. Its entries depend on the edition.
     @ViewBuilder
     private var menuItems: some View {
-        Button("Hecho", action: onComplete)
-        Button(item.due == nil ? "Ponerle fecha…" : "Cambiar fecha…", action: onPickDate)
+        Button(tr("task.done"), action: onComplete)
+        Button(item.due == nil ? tr("task.addDateMenu") : tr("task.changeDateMenu"), action: onPickDate)
         if item.due != nil {
-            Button("Quitar fecha", action: onClearDate)
+            Button(tr("task.removeDate"), action: onClearDate)
         }
 
         switch Edition.current {
         case .notion:
             if let link = item.calendarURL, let url = URL(string: link) {
-                Button("Abrir en Google Calendar") { NSWorkspace.shared.open(url) }
+                Button(tr("task.openInGoogleCalendar")) { NSWorkspace.shared.open(url) }
             }
             Divider()
-            Button("Abrir en Notion") {
+            Button(tr("task.openInNotion")) {
                 let pageID = item.id.replacingOccurrences(of: "-", with: "")
                 if let url = URL(string: "https://www.notion.so/\(pageID)") { NSWorkspace.shared.open(url) }
             }
         case .local:
             if let url = GoogleCalendarLink.newEvent(for: item) {
-                Button("Añadir a Google Calendar") { NSWorkspace.shared.open(url) }
+                Button(tr("task.addToGoogleCalendar")) { NSWorkspace.shared.open(url) }
             }
             if let onDelete {
                 Divider()
-                Button("Borrar", action: onDelete)
+                Button(tr("task.delete"), action: onDelete)
             }
         }
     }
@@ -105,7 +105,7 @@ struct TodoRow: View {
         }
         .font(.system(size: 11, weight: .medium))
         .foregroundColor(done ? .secondary : color)
-        .help(item.calendarURL != nil ? "Está en tu Google Calendar (clic para abrirlo)" : "Cambiar fecha")
+        .help(item.calendarURL != nil ? tr("task.inCalendar") : tr("task.changeDate"))
         .onTapGesture {
             if let link = item.calendarURL, let url = URL(string: link) {
                 NSWorkspace.shared.open(url)

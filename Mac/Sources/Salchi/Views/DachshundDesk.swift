@@ -25,7 +25,7 @@ struct DachshundDesk: View {
         .gesture(DragGesture(minimumDistance: 2)
             .onChanged { _ in mover.changed() }
             .onEnded { _ in mover.ended() })
-        .help("\(count) pendiente\(count == 1 ? "" : "s")")
+        .help(tr("dog.pending", ["count": String(count)]))
     }
 
     /// One animation frame.

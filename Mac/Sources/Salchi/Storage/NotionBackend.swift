@@ -65,7 +65,7 @@ struct NotionBackend: TaskBackend {
             "parent": ["database_id": AppConfig.databaseID],
             "properties": properties,
         ])
-        guard let id = page["id"] as? String else { throw TaskBackendError.api("No se pudo crear la tarea") }
+        guard let id = page["id"] as? String else { throw TaskBackendError.api(tr("errors.createFailed")) }
         return id
     }
 
@@ -91,7 +91,7 @@ struct NotionBackend: TaskBackend {
     /// Performs an authenticated request and returns the decoded JSON object.
     private func request(_ path: String, method: String, body: [String: Any]? = nil) async throws -> [String: Any] {
         guard let token = Keychain.load() else { throw TaskBackendError.missingToken }
-        guard let url = URL(string: Self.apiBase + path) else { throw TaskBackendError.api("Dirección de Notion no válida") }
+        guard let url = URL(string: Self.apiBase + path) else { throw TaskBackendError.api(tr("errors.badAddress")) }
 
         var request = URLRequest(url: url)
         request.httpMethod = method
@@ -104,7 +104,7 @@ struct NotionBackend: TaskBackend {
         let (data, response) = try await URLSession.shared.data(for: request)
         let json = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] ?? [:]
         guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
-            throw TaskBackendError.api((json["message"] as? String) ?? "Notion no responde")
+            throw TaskBackendError.api((json["message"] as? String) ?? tr("errors.notResponding"))
         }
         return json
     }
@@ -116,7 +116,7 @@ struct NotionBackend: TaskBackend {
             .first { ($0["type"] as? String) == "title" }
         let fragments = titleProperty?["title"] as? [[String: Any]] ?? []
         let text = fragments.compactMap { $0["plain_text"] as? String }.joined()
-        return text.isEmpty ? "(sin título)" : text
+        return text.isEmpty ? tr("list.untitled") : text
     }
 
     /// The due date, if the page has one. An empty date property comes back as `null`.

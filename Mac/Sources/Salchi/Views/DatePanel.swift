@@ -58,10 +58,10 @@ struct DatePanel: View {
             header
 
             HStack(spacing: 6) {
-                quickPick("Hoy") { select(Date()) }
-                quickPick("Mañana") { select(Calendar.current.date(byAdding: .day, value: 1, to: Date()) ?? Date()) }
-                quickPick("Sábado") { select(DueFormat.nextWeekday(7)) }
-                quickPick("Lunes") { select(DueFormat.nextWeekday(2)) }
+                quickPick(tr("picker.today")) { select(Date()) }
+                quickPick(tr("picker.tomorrow")) { select(Calendar.current.date(byAdding: .day, value: 1, to: Date()) ?? Date()) }
+                quickPick(Self.weekdayName(7)) { select(DueFormat.nextWeekday(7)) }
+                quickPick(Self.weekdayName(2)) { select(DueFormat.nextWeekday(2)) }
             }
 
             // Days before today are greyed out and cannot be picked.
@@ -71,7 +71,7 @@ struct DatePanel: View {
                 .frame(maxWidth: .infinity)
 
             HStack(spacing: 8) {
-                Toggle("A una hora", isOn: $hasTime)
+                Toggle(tr("picker.atTime"), isOn: $hasTime)
                     .toggleStyle(.checkbox)
                     .font(.system(size: 12))
                 if hasTime {
@@ -93,17 +93,17 @@ struct DatePanel: View {
             }
 
             if isInPast {
-                Text(hasTime ? "Esa hora ya ha pasado" : "Ese día ya ha pasado")
+                Text(hasTime ? tr("picker.pastTime") : tr("picker.pastDay"))
                     .font(.system(size: 11))
                     .foregroundColor(.red)
             }
 
             HStack {
                 if canRemove {
-                    Button("Quitar fecha") { onDone(.set(nil)) }
+                    Button(tr("task.removeDate")) { onDone(.set(nil)) }
                 }
                 Spacer()
-                Button("Listo") {
+                Button(tr("picker.confirm")) {
                     // Checked again on click: the time may have passed while the panel was open.
                     guard !isInPast else { return }
                     onDone(.set(result))
@@ -130,7 +130,7 @@ struct DatePanel: View {
             }
             .buttonStyle(.plain)
             .foregroundColor(.secondary)
-            .help("Cerrar sin cambiar")
+            .help(tr("picker.close"))
         }
     }
 
@@ -182,7 +182,14 @@ struct DatePanel: View {
         }
     }
 
-    /// Rounded shortcut button ("Hoy", "Mañana"…).
+    /// Name of a weekday in the current language, capitalised ("sábado" → "Sábado").
+    /// - Parameter weekday: 1 = Sunday … 7 = Saturday (Foundation's numbering).
+    private static func weekdayName(_ weekday: Int) -> String {
+        let name = DueFormat.format(DueFormat.nextWeekday(weekday), template: "EEEE")
+        return name.prefix(1).uppercased(with: L10n.shared.locale) + name.dropFirst()
+    }
+
+    /// Rounded shortcut button ("Today", "Tomorrow"…).
     private func quickPick(_ label: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(label)

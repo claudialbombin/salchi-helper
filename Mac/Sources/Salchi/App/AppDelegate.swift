@@ -42,7 +42,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         panel.orderFrontRegardless()
         store.start()
 
-        if Edition.current == .notion && Keychain.load() == nil {
+        if !L10n.shared.hasChosen {
+            ui.expanded = true // first start: the card opens on the language chooser
+        } else if Edition.current == .notion && Keychain.load() == nil {
             openSettings()
         } else if ui.pinned {
             ui.expanded = true
@@ -122,22 +124,45 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                 self?.statusItem?.button?.title = items.isEmpty ? "🐕" : "🐕 \(items.count)"
             }
             .store(in: &subscriptions)
+
+        L10n.shared.$language.dropFirst()
+            .sink { [weak self] _ in DispatchQueue.main.async { self?.buildMenu() } }
+            .store(in: &subscriptions)
+
+        // Once the first-run language is chosen, carry on with the usual start-up.
+        L10n.shared.$hasChosen.removeDuplicates().dropFirst()
+            .filter { $0 }
+            .sink { [weak self] _ in
+                DispatchQueue.main.async {
+                    guard let self else { return }
+                    if Edition.current == .notion && Keychain.load() == nil {
+                        self.openSettings()
+                    } else {
+                        self.maybeCollapse()
+                    }
+                }
+            }
+            .store(in: &subscriptions)
     }
 
     /// Menu-bar item showing the task count, with a small menu.
     private func setUpStatusItem() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         statusItem.button?.title = "🐕"
+        buildMenu()
+    }
 
+    /// (Re)builds the menu-bar menu in the current language.
+    private func buildMenu() {
         let menu = NSMenu()
-        menu.addItem(menuItem("Mostrar / ocultar a Salchi", #selector(toggleVisible), key: "t"))
-        menu.addItem(menuItem("Recargar", #selector(reload), key: "r"))
-        menu.addItem(menuItem("Ajustes…", #selector(openSettings), key: ","))
+        menu.addItem(menuItem(tr("tray.toggle"), #selector(toggleVisible), key: "t"))
+        menu.addItem(menuItem(tr("header.reload"), #selector(reload), key: "r"))
+        menu.addItem(menuItem(tr("tray.settings"), #selector(openSettings), key: ","))
         if Edition.current == .notion {
-            menu.addItem(menuItem("Abrir la base de datos en Notion", #selector(openNotion), key: ""))
+            menu.addItem(menuItem(tr("tray.openList"), #selector(openNotion), key: ""))
         }
         menu.addItem(.separator())
-        menu.addItem(menuItem("Salir", #selector(quit), key: "q"))
+        menu.addItem(menuItem(tr("tray.quit"), #selector(quit), key: "q"))
         statusItem.menu = menu
     }
 
@@ -182,7 +207,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     /// Collapses the card unless something is keeping it open.
     private func maybeCollapse() {
-        guard !hovering, !ui.pinned, !ui.editing, !ui.showSettings, !mover.dragging else { return }
+        guard !hovering, !ui.pinned, !ui.editing, !ui.showSettings, !mover.dragging, L10n.shared.hasChosen else { return }
         if ui.expanded { ui.expanded = false }
     }
 

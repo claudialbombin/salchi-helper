@@ -5,6 +5,7 @@ import SwiftUI
 struct CardView: View {
     @ObservedObject var store: TodoStore
     @ObservedObject var ui: UIState
+    @ObservedObject private var l10n = L10n.shared
     let mover: WindowMover
 
     /// Text being typed in the bottom bar.
@@ -19,7 +20,9 @@ struct CardView: View {
         VStack(spacing: 0) {
             header
             Divider().opacity(0.5)
-            if ui.showSettings {
+            if !l10n.hasChosen {
+                LanguageChooser()
+            } else if ui.showSettings {
                 ScrollView { SettingsView(store: store, ui: ui).padding(14) }
             } else if let target = panel {
                 DatePanel(title: panelTitle(target), initial: initialDue(target)) { result in
@@ -50,7 +53,7 @@ struct CardView: View {
     /// Title, counter and buttons. Dragging it moves the window.
     private var header: some View {
         HStack(spacing: 8) {
-            Text("🐕 notitas").font(.system(size: 15, weight: .bold))
+            Text(tr("header.title")).font(.system(size: 15, weight: .bold))
             Text("\(store.items.count)")
                 .font(.system(size: 12, weight: .bold, design: .monospaced))
                 .foregroundColor(.black)
@@ -62,8 +65,11 @@ struct CardView: View {
             }
             Spacer()
             iconButton("arrow.clockwise") { store.refresh() }
+                .help(tr("header.reload"))
             iconButton(ui.pinned ? "pin.fill" : "pin") { ui.pinned.toggle() }
+                .help(tr("header.keepOpen"))
             iconButton("gearshape") { ui.showSettings.toggle() }
+                .help(tr("header.settings"))
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
@@ -86,7 +92,7 @@ struct CardView: View {
                         .background(RoundedRectangle(cornerRadius: 8).fill(Color.red.opacity(0.08)))
                 }
                 if store.items.isEmpty && store.error == nil {
-                    Text("nada pendiente ✨")
+                    Text(tr("list.empty"))
                         .font(.system(size: 13))
                         .foregroundColor(.secondary)
                         .frame(maxWidth: .infinity)
@@ -114,7 +120,7 @@ struct CardView: View {
             Image(systemName: "plus")
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundColor(.secondary)
-            TextField("apuntar algo…", text: $draft)
+            TextField(tr("draft.placeholder"), text: $draft)
                 .textFieldStyle(.plain)
                 .font(.system(size: 13))
                 .focused($focused)
@@ -131,12 +137,12 @@ struct CardView: View {
                         .background(Capsule().fill(Color.highlight))
                 }
                 .buttonStyle(.plain)
-                .help("Cambiar fecha")
+                .help(tr("task.changeDate"))
             }
             iconButton(draftDue == nil ? "calendar.badge.plus" : "calendar") {
                 panel = panel == .newTask ? nil : .newTask
             }
-            .help("Ponerle fecha a lo que apuntes")
+            .help(tr("draft.dateHint"))
         }
         .padding(.leading, 14)
         .padding(.trailing, 10)
@@ -172,7 +178,7 @@ struct CardView: View {
     /// Heading of the date panel for the given target.
     private func panelTitle(_ target: DatePanelTarget) -> String {
         switch target {
-        case .newTask: return "¿Para cuándo?"
+        case .newTask: return tr("picker.title")
         case .item(let item): return "📅 " + item.title
         }
     }

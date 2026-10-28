@@ -4,6 +4,7 @@
 'use strict';
 
 const { Tray, Menu, nativeImage } = require('electron');
+const { t } = require('./i18n');
 
 /**
  * @typedef {object} TrayActions
@@ -20,18 +21,28 @@ const { Tray, Menu, nativeImage } = require('electron');
  * @param {object} options
  * @param {string} options.iconPath
  * @param {TrayActions} options.actions
- * @returns {{ setPendingCount: (count: number) => void }}
+ * @returns {{ setPendingCount: (count: number) => void, relabel: () => void }}
  */
 function createTray({ iconPath, actions }) {
   const tray = new Tray(nativeImage.createFromPath(iconPath));
+  let pendingCount = 0;
 
-  const template = [{ label: 'Mostrar / ocultar a Salchi', click: actions.toggleVisible }];
-  if (actions.refresh) template.push({ label: 'Recargar', click: actions.refresh });
-  template.push({ label: 'Ajustes…', click: actions.openSettings });
-  if (actions.openInNotion) template.push({ label: 'Abrir la lista en Notion', click: actions.openInNotion });
-  template.push({ type: 'separator' }, { label: 'Salir', click: actions.quit });
+  /** Builds the menu in the current language. */
+  const buildMenu = () => {
+    const template = [{ label: t('tray.toggle'), click: actions.toggleVisible }];
+    if (actions.refresh) template.push({ label: t('header.reload'), click: actions.refresh });
+    template.push({ label: t('tray.settings'), click: actions.openSettings });
+    if (actions.openInNotion) template.push({ label: t('tray.openList'), click: actions.openInNotion });
+    template.push({ type: 'separator' }, { label: t('tray.quit'), click: actions.quit });
+    tray.setContextMenu(Menu.buildFromTemplate(template));
+  };
 
-  tray.setContextMenu(Menu.buildFromTemplate(template));
+  /** Writes the tooltip in the current language. */
+  const updateTooltip = () => {
+    tray.setToolTip(pendingCount ? t('tray.pending', { count: pendingCount }) : t('tray.nothing'));
+  };
+
+  buildMenu();
   tray.on('click', actions.toggleVisible);
 
   return {
@@ -41,9 +52,14 @@ function createTray({ iconPath, actions }) {
      * @param {number} count
      */
     setPendingCount(count) {
-      tray.setToolTip(count
-        ? `Salchi · ${count} pendiente${count === 1 ? '' : 's'}`
-        : 'Salchi · nada pendiente');
+      pendingCount = count;
+      updateTooltip();
+    },
+
+    /** Rebuilds the menu and tooltip after the language changes. */
+    relabel() {
+      buildMenu();
+      updateTooltip();
     },
   };
 }

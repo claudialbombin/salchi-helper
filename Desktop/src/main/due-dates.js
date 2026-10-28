@@ -8,6 +8,8 @@
  */
 'use strict';
 
+const { t } = require('./i18n');
+
 const DUE_PATTERN = /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}:\d{2}))?$/;
 
 /** Default length of a timed task when it is turned into a calendar event. */
@@ -89,7 +91,7 @@ function googleCalendarTemplateUrl(task) {
     action: 'TEMPLATE',
     text: `🐕 ${task.title}`,
     dates,
-    details: 'Apuntado en Salchi 🐕',
+    details: t('task.calendarDetails'),
   });
   return `https://calendar.google.com/calendar/render?${query}`;
 }

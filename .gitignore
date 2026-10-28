@@ -17,3 +17,6 @@ Desktop/dist/
 
 # Personal bundle for a friend
 Version Rodri/
+
+# Generated at build time from locales/
+Desktop/build/generated/

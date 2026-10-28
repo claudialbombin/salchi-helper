@@ -35,6 +35,9 @@ rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp .build/release/Salchi "$APP/Contents/MacOS/Salchi"
 cp Resources/Salchi.icns "$APP/Contents/Resources/Salchi.icns"
+# Translations, shared with the Windows and Linux app (see ../locales).
+mkdir -p "$APP/Contents/Resources/locales"
+cp ../locales/*.json "$APP/Contents/Resources/locales/"
 
 cat > "$APP/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
@@ -47,7 +50,7 @@ cat > "$APP/Contents/Info.plist" <<PLIST
   <key>CFBundleIconFile</key><string>Salchi</string>
   <key>CFBundleExecutable</key><string>Salchi</string>
   <key>CFBundlePackageType</key><string>APPL</string>
-  <key>CFBundleShortVersionString</key><string>1.1.1</string>
+  <key>CFBundleShortVersionString</key><string>1.2</string>
   <key>CFBundleVersion</key><string>2</string>
   <key>LSMinimumSystemVersion</key><string>13.0</string>
   <key>LSUIElement</key><true/>

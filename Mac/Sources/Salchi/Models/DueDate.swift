@@ -63,8 +63,8 @@ enum DueFormat {
         return calendar.isDate(due.date, inSameDayAs: now) ? .today : .later
     }
 
-    /// Short Spanish label: "hoy", "mañana", "jueves", "30 oct", "3 ene 2027"… followed by
-    /// " · 18:00" when the task has a time.
+    /// Short label in the current language: "today", "tomorrow", "Thursday", "Oct 30",
+    /// "Jan 3, 2027"… followed by the time when the task has one.
     static func label(_ due: DueDate, now: Date = Date()) -> String {
         let calendar = Calendar.current
         let days = calendar.dateComponents(
@@ -73,15 +73,15 @@ enum DueFormat {
 
         var text: String
         switch days {
-        case 0: text = "hoy"
-        case 1: text = "mañana"
-        case -1: text = "ayer"
-        case 2...6: text = format(due.date, "EEEE")
+        case 0: text = tr("due.today")
+        case 1: text = tr("due.tomorrow")
+        case -1: text = tr("due.yesterday")
+        case 2...6: text = format(due.date, template: "EEEE")
         default:
             let sameYear = calendar.component(.year, from: due.date) == calendar.component(.year, from: now)
-            text = format(due.date, sameYear ? "d MMM" : "d MMM yyyy")
+            text = format(due.date, template: sameYear ? "dMMM" : "dMMMy")
         }
-        if due.hasTime { text += " · " + format(due.date, "HH:mm") }
+        if due.hasTime { text += " · " + format(due.date, template: "jmm") }
         return text
     }
 
@@ -93,11 +93,15 @@ enum DueFormat {
         return calendar.nextDate(after: start, matching: DateComponents(weekday: weekday), matchingPolicy: .nextTime) ?? start
     }
 
-    /// Formats with a Spanish locale and drops the dots of abbreviations ("oct." → "oct").
-    private static func format(_ date: Date, _ pattern: String) -> String {
+    /// Formats a date in the current language. `template` lists the fields wanted (e.g. "dMMM");
+    /// the locale decides their order and punctuation, and "j" picks a 24-hour or AM/PM clock.
+    static func format(_ date: Date, template: String) -> String {
+        let l10n = L10n.shared
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "es_ES")
-        formatter.dateFormat = pattern
-        return formatter.string(from: date).replacingOccurrences(of: ".", with: "")
+        formatter.locale = l10n.locale
+        formatter.setLocalizedDateFormatFromTemplate(template)
+        let text = formatter.string(from: date)
+        // Spanish abbreviations end in a dot ("30 oct."), which looks noisy in a tiny label.
+        return l10n.language == "es" ? text.replacingOccurrences(of: ".", with: "") : text
     }
 }

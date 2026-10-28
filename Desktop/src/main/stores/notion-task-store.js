@@ -7,6 +7,7 @@
 'use strict';
 
 const { TaskStore } = require('./task-store');
+const { t } = require('../i18n');
 
 /**
  * Task store for the Notion edition.
@@ -45,7 +46,7 @@ class NotionTaskStore extends TaskStore {
     this.emitChange();
 
     try {
-      if (!this.databaseId) throw new Error('Falta elegir la página de Notion: abre ⚙ ajustes.');
+      if (!this.databaseId) throw new Error(t('errors.missingPage'));
       if (this.schemaCheckedFor !== this.databaseId) {
         await this.client.ensureSchema(this.databaseId);
         this.schemaCheckedFor = this.databaseId;
@@ -124,11 +125,11 @@ class NotionTaskStore extends TaskStore {
   extraMenuItems(task, { openExternal }) {
     const items = [];
     if (task.calendarUrl) {
-      items.push({ label: 'Abrir en Google Calendar', click: () => openExternal(task.calendarUrl) });
+      items.push({ label: t('task.openInGoogleCalendar'), click: () => openExternal(task.calendarUrl) });
     }
     items.push(
       { type: 'separator' },
-      { label: 'Abrir en Notion', click: () => openExternal(`https://www.notion.so/${task.id.replace(/-/g, '')}`) },
+      { label: t('task.openInNotion'), click: () => openExternal(`https://www.notion.so/${task.id.replace(/-/g, '')}`) },
     );
     return items;
   }

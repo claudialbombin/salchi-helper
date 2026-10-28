@@ -15,6 +15,7 @@ const root = path.join(__dirname, '..');
 const tests = [
   { file: 'e2e/notion.e2e.js', edition: 'notion' },
   { file: 'e2e/local.e2e.js', edition: 'local' },
+  { file: 'e2e/i18n.e2e.js', edition: 'local' },
 ];
 
 /**
@@ -31,7 +32,7 @@ function runTest({ file, edition }) {
 
   const result = spawnSync(command, commandArgs, { encoding: 'utf8', env: { ...process.env, TZ: process.env.TZ || 'Europe/Madrid' } });
   // Only show the test's own output, not Chromium's console noise.
-  const lines = `${result.stdout}${result.stderr}`.split('\n').filter((line) => /^(\s+[✔✘]|[A-Z][a-z]+ edition)/.test(line));
+  const lines = `${result.stdout}${result.stderr}`.split('\n').filter((line) => /^(\s+[✔✘]|[A-Z][a-z]+ edition|Languages)/.test(line));
   console.log(lines.join('\n'));
   return result.status === 0;
 }

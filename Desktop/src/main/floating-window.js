@@ -50,6 +50,8 @@ class FloatingWindow extends EventEmitter {
       pinned: !!config.get('pinned'),
       settings: false,
       editing: false,
+      /** The first-run language chooser is showing; it keeps the list open until answered. */
+      chooseLanguage: false,
     };
 
     /** @private */ this.hovering = false;
@@ -164,6 +166,25 @@ class FloatingWindow extends EventEmitter {
   }
 
   /**
+   * Opens the list on the language chooser shown the first time Salchi starts.
+   */
+  openLanguageChooser() {
+    this.window.showInactive();
+    this.setExpanded(true);
+    this.ui.chooseLanguage = true;
+    this.emit('ui-change');
+  }
+
+  /**
+   * Closes the first-run language chooser.
+   */
+  closeLanguageChooser() {
+    this.ui.chooseLanguage = false;
+    this.emit('ui-change');
+    setTimeout(() => this.maybeCollapse(), 0);
+  }
+
+  /**
    * Hides or shows the whole window (tray menu / tray click).
    */
   toggleVisible() {
@@ -199,8 +220,8 @@ class FloatingWindow extends EventEmitter {
    * Collapses the list unless something is keeping it open.
    */
   maybeCollapse() {
-    const { pinned, editing, settings } = this.ui;
-    if (this.hovering || pinned || editing || settings || this.drag || this.menuOpen) return;
+    const { pinned, editing, settings, chooseLanguage } = this.ui;
+    if (this.hovering || pinned || editing || settings || chooseLanguage || this.drag || this.menuOpen) return;
     this.setExpanded(false);
   }
 

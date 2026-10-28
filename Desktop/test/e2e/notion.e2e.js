@@ -74,6 +74,7 @@ fs.writeFileSync(path.join(userData, 'config.json'), JSON.stringify({
   checkbox: 'Hecho', // 1.0 key: must be migrated to doneProperty
   autostartSet: true,
   pinned: true,
+  language: 'es',
 }));
 const menus = captureMenus();
 

@@ -90,12 +90,13 @@ Sources/Salchi/
 ├── Salchi.swift            Entry point
 ├── App/
 │   ├── AppDelegate.swift   Floating panel, menu-bar item, hover / resize / position logic
-│   └── Edition.swift       Notion or local edition, read from Info.plist
+│   ├── Edition.swift       Notion or local edition, read from Info.plist
+│   └── L10n.swift          Translations from ../locales, language choice, locale and RTL
 ├── Models/                 TodoItem, DueDate (+ formatting), Google Calendar links
 ├── Storage/                TaskBackend protocol, Notion and local backends, Keychain, settings
 ├── State/                  TodoStore (list + optimistic updates), UIState
 ├── Window/                 FloatingPanel and the window-dragging helper
-└── Views/                  The dog, the card, the rows, the date picker, settings
+└── Views/                  The dog, the card, the rows, the date picker, settings, language chooser
 ```
 
 ```mermaid

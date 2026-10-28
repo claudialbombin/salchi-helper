@@ -42,7 +42,12 @@
    **System Settings → Privacy & Security**, scroll down and click **Open Anyway**.
 
 > [!NOTE]
-> Salchi appears in the bottom-right corner, and a `🐕` item shows up in the menu bar. Turn on **Abrir al iniciar sesión** (*open at login*) in ⚙️ settings if you want it every day.
+> Salchi appears in the bottom-right corner, and a `🐕` item shows up in the menu bar. Turn on **Open at login** in ⚙️ settings if you want it every day.
+
+## 🌍 Language
+
+Salchi speaks 46 languages, from English (US and UK), Spanish and French to Japanese, Arabic and Ukrainian.
+The first time it opens, Salchi asks which one you want (yours is already selected). You can change it at any time in ⚙️ **Settings → Language**.
 
 ## 🐕 Using Salchi
 
@@ -50,12 +55,12 @@
 | --- | --- |
 | 🖱️ Hover the dog | The list opens; move away and it folds back. |
 | ✋ Drag the dog or the list header | Moves Salchi anywhere, even flush against the screen edge. |
-| ⌨️ Type in **apuntar algo…** (*jot something down…*) and press <kbd>Enter</kbd> | Adds a task. |
+| ⌨️ Type in **jot something down…** and press <kbd>Enter</kbd> | Adds a task. |
 | ⭕ Click the circle | Ticks the task off. |
 | ✕ Hover a task | Deletes it for good. |
 | 📅 Next to the text box | Gives the next task a due date before you press <kbd>Enter</kbd>. |
 | 📅 Hover a task and click its calendar | Sets or changes that task's date. |
-| 🖱️ Right-click a task | Every action: **Hecho** (*done*), **Cambiar fecha…** (*change date*), **Quitar fecha** (*remove date*), **Añadir a Google Calendar** (*add to Google Calendar*) and **Borrar** (*delete*). |
+| 🖱️ Right-click a task | Every action: **Done**, **Change date…**, **Remove date**, **Add to Google Calendar** and **Delete**. |
 | 📌 Pin | Keeps the list open. |
 | ⟳ Reload | Fetches the list again right away. |
 | ❗ A red badge on the dog | Something went wrong; hover to read the message. |
@@ -65,10 +70,10 @@
 
 <br>
 
-- Quick picks: **Hoy** (*today*), **Mañana** (*tomorrow*), **Sábado** (*Saturday*), **Lunes** (*Monday*), or any day on
+- Quick picks: **Today**, **Tomorrow**, **Saturday**, **Monday**, or any day on
   the calendar.
-- Tick **A una hora** (*at a time*) to add a time; press **Listo** (*done*) to confirm.
-- Under each task the date reads *hoy*, *mañana*, a weekday or a short date. It turns **red** when overdue and
+- Tick **At a set time** to add a time; press **Done** to confirm.
+- Under each task the date reads *today*, *tomorrow*, a weekday or a short date. It turns **red** when overdue and
   **orange** when due today.
 - Dated tasks go first, soonest first. Undated ones follow in the order you added them.
 
@@ -78,7 +83,7 @@
 
 <img align="right" src="../../assets/google-calendar.svg" width="44%" alt="The dachshund pinning tasks onto a calendar">
 
-Right-click a task with a date → **Añadir a Google Calendar** (*add to Google Calendar*).
+Right-click a task with a date → **Add to Google Calendar**.
 Your browser opens Google Calendar with the event already filled in: title, day and time. Just press **Save**.
 
 > [!NOTE]
