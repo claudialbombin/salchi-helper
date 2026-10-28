@@ -9,7 +9,7 @@ const { shell } = require('electron');
 const { isolateUserData, runScenario, captureMenus, localDate } = require('./harness');
 
 const userData = isolateUserData();
-fs.writeFileSync(path.join(userData, 'config.json'), JSON.stringify({ autostartSet: true, pinned: true }));
+fs.writeFileSync(path.join(userData, 'config.json'), JSON.stringify({ autostartSet: true, pinned: true, language: 'es' }));
 // Tasks saved by version 1.0, with Spanish keys: they must survive the upgrade.
 fs.writeFileSync(path.join(userData, 'tareas.json'), JSON.stringify({
   pendientes: [
