@@ -11,7 +11,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Electron-33-f7e2a0?style=flat-square&labelColor=3b2a1f" alt="Electron 33">
-  <img src="https://img.shields.io/badge/tests-22%20end--to--end-a36130?style=flat-square&labelColor=3b2a1f" alt="22 end-to-end tests">
+  <img src="https://img.shields.io/badge/tests-44%20end--to--end-a36130?style=flat-square&labelColor=3b2a1f" alt="44 end-to-end tests">
   <img src="https://img.shields.io/badge/packages-NSIS%20%C2%B7%20AppImage%20%C2%B7%20deb-f7e2a0?style=flat-square&labelColor=3b2a1f" alt="NSIS, AppImage and deb">
 </p>
 
@@ -51,12 +51,13 @@ src/
 │   ├── config.js              Settings file; the Notion token is encrypted with safeStorage
 │   ├── autostart.js           Open at login (Windows API / freedesktop autostart on Linux)
 │   ├── due-dates.js           Due-date validation, sorting and Google Calendar links
+│   ├── i18n.js                Loads the translations in ../locales and picks the language
 │   ├── notion-client.js       Minimal Notion REST client
 │   └── stores/                TaskStore base class + Notion and local implementations
 ├── preload.js                 The only API the renderer can use (context isolation)
 ├── renderer/                  index.html, styles.css, app.js
 └── assets/                    Window and tray icons
-build/                         electron-builder configs, icons, Linux packaging hooks
+build/                         electron-builder configs, icons, Linux packaging hooks, installer language menu
 test/                          End-to-end tests driving the real UI
 ```
 
