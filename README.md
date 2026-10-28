@@ -12,7 +12,7 @@
   <a href="Mac/"><img src="https://img.shields.io/badge/macOS-13%2B-f7e2a0?style=for-the-badge&labelColor=3b2a1f" alt="macOS 13+"></a>
   <a href="Windows/"><img src="https://img.shields.io/badge/Windows-10%20%7C%2011-f7e2a0?style=for-the-badge&labelColor=3b2a1f" alt="Windows 10 and 11"></a>
   <a href="Linux/"><img src="https://img.shields.io/badge/Linux-x64-f7e2a0?style=for-the-badge&labelColor=3b2a1f" alt="Linux x64"></a>
-  <img src="https://img.shields.io/badge/version-1.1-a36130?style=for-the-badge&labelColor=3b2a1f" alt="Version 1.1">
+  <img src="https://img.shields.io/badge/version-1.1.1-a36130?style=for-the-badge&labelColor=3b2a1f" alt="Version 1.1.1">
 </p>
 
 <p align="center">

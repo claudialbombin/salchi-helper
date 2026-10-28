@@ -64,7 +64,8 @@ struct DatePanel: View {
                 quickPick("Lunes") { select(DueFormat.nextWeekday(2)) }
             }
 
-            DatePicker("", selection: $day, displayedComponents: .date)
+            // Days before today are greyed out and cannot be picked.
+            DatePicker("", selection: $day, in: Calendar.current.startOfDay(for: Date())..., displayedComponents: .date)
                 .datePickerStyle(.graphical)
                 .labelsHidden()
                 .frame(maxWidth: .infinity)
@@ -74,7 +75,8 @@ struct DatePanel: View {
                     .toggleStyle(.checkbox)
                     .font(.system(size: 12))
                 if hasTime {
-                    DatePicker("", selection: $day, displayedComponents: .hourAndMinute)
+                    // The range covers the whole date, so it only restricts the time when the day is today.
+                    DatePicker("", selection: $day, in: Self.currentMinute()..., displayedComponents: .hourAndMinute)
                         .datePickerStyle(.stepperField)
                         .labelsHidden()
                         .fixedSize()
@@ -82,12 +84,18 @@ struct DatePanel: View {
                 Spacer()
             }
             .onChange(of: hasTime) { enabled in
-                // Midnight is never what the user means: suggest a morning time instead.
+                // Midnight is never what the user means: suggest a time that makes sense instead.
                 let calendar = Calendar.current
                 let atMidnight = calendar.component(.hour, from: day) == 0 && calendar.component(.minute, from: day) == 0
                 if enabled && atMidnight {
-                    day = calendar.date(bySettingHour: Self.defaultHour, minute: 0, second: 0, of: day) ?? day
+                    day = Self.suggestedTime(on: day)
                 }
+            }
+
+            if isInPast {
+                Text(hasTime ? "Esa hora ya ha pasado" : "Ese día ya ha pasado")
+                    .font(.system(size: 11))
+                    .foregroundColor(.red)
             }
 
             HStack {
@@ -95,8 +103,13 @@ struct DatePanel: View {
                     Button("Quitar fecha") { onDone(.set(nil)) }
                 }
                 Spacer()
-                Button("Listo") { onDone(.set(result)) }
-                    .buttonStyle(.borderedProminent)
+                Button("Listo") {
+                    // Checked again on click: the time may have passed while the panel was open.
+                    guard !isInPast else { return }
+                    onDone(.set(result))
+                }
+                .buttonStyle(.borderedProminent)
+                .disabled(isInPast)
             }
             .font(.system(size: 12))
         }
@@ -125,6 +138,36 @@ struct DatePanel: View {
     private var result: DueDate {
         if hasTime { return DueDate(date: day, hasTime: true) }
         return DueDate(date: Calendar.current.startOfDay(for: day), hasTime: false)
+    }
+
+    /// `true` when the chosen moment is already over: an earlier day, or today at an earlier time.
+    private var isInPast: Bool {
+        if hasTime { return day < Self.currentMinute() }
+        return Calendar.current.startOfDay(for: day) < Calendar.current.startOfDay(for: Date())
+    }
+
+    /// The current time without seconds. Due times have minute precision, so the minute we are in
+    /// still counts as valid; comparing with seconds would reject a time the picker itself offered.
+    private static func currentMinute() -> Date {
+        let calendar = Calendar.current
+        let now = Date()
+        return calendar.dateInterval(of: .minute, for: now)?.start ?? now
+    }
+
+    /// Default time for a day: 9:00, or the next full hour when 9:00 has already passed today.
+    ///
+    /// - Parameter date: Any moment of the chosen day.
+    /// - Returns: The suggested moment. When no full hour is left today (after 23:00) it returns
+    ///   9:00, which the panel flags as past so the user picks another day or time.
+    private static func suggestedTime(on date: Date, now: Date = Date()) -> Date {
+        let calendar = Calendar.current
+        let morning = calendar.date(bySettingHour: defaultHour, minute: 0, second: 0, of: date) ?? date
+        if morning > now { return morning }
+        guard let nextHour = calendar.nextDate(after: now, matching: DateComponents(minute: 0), matchingPolicy: .nextTime),
+              calendar.isDate(nextHour, inSameDayAs: date) else {
+            return morning
+        }
+        return nextHour
     }
 
     /// Moves the selection to another day, keeping the chosen time if there is one.

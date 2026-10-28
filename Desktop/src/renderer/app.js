@@ -76,6 +76,38 @@ function formatDue(day, time) {
 }
 
 /**
+ * Tells whether a choice from the picker is already over: a day before today, or today at a
+ * time that has passed. Times have minute precision, so the current minute still counts.
+ *
+ * @param {Date} day - Local midnight of the chosen day.
+ * @param {string | null} time - "HH:MM", or `null` for an all-day task.
+ * @param {Date} [now]
+ * @returns {boolean}
+ */
+function isInPast(day, time, now = new Date()) {
+  if (!time) return day < startOfDay(now);
+  const [hours, minutes] = time.split(':').map(Number);
+  const chosen = new Date(day.getFullYear(), day.getMonth(), day.getDate(), hours, minutes);
+  const currentMinute = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes());
+  return chosen < currentMinute;
+}
+
+/**
+ * Suggested time when "A una hora" is ticked: 9:00, or the next full hour if 9:00 has already
+ * passed today. After 23:00 there is no full hour left, so it stays at 9:00 and the picker
+ * reports it as past.
+ *
+ * @param {Date} day - Local midnight of the chosen day.
+ * @param {Date} [now]
+ * @returns {string} "HH:MM".
+ */
+function suggestedTime(day, now = new Date()) {
+  if (!isInPast(day, '09:00', now)) return '09:00';
+  const nextHour = now.getHours() + 1;
+  return nextHour <= 23 ? `${pad(nextHour)}:00` : '09:00';
+}
+
+/**
  * Human-friendly label: "hoy", "mañana", "jueves", "30 oct", "3 ene 2027"… plus the time.
  *
  * @param {{ date: Date, hasTime: boolean }} due
@@ -333,6 +365,7 @@ function renderPicker() {
   $('timeInput').hidden = !picker.hasTime;
   $('timeInput').value = picker.time;
   $('clearDueButton').hidden = !picker.canClear;
+  updatePastWarning();
 
   const monthName = new Intl.DateTimeFormat('es-ES', { month: 'long', year: 'numeric' }).format(picker.month);
   $('monthLabel').textContent = monthName.charAt(0).toUpperCase() + monthName.slice(1);
@@ -348,11 +381,18 @@ function renderPicker() {
 
   const daysInMonth = new Date(first.getFullYear(), first.getMonth() + 1, 0).getDate();
   const today = startOfDay(new Date()).getTime();
+
+  // There is nothing to pick in months that are already over.
+  const thisMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+  $('prevMonth').disabled = first <= thisMonth;
+
   for (let dayNumber = 1; dayNumber <= daysInMonth; dayNumber++) {
     const date = new Date(first.getFullYear(), first.getMonth(), dayNumber);
     const time = date.getTime();
     const button = textElement('button', '', String(dayNumber));
     button.classList.toggle('past', time < today);
+    // Past days stay visible (an overdue task opens on its own day) but cannot be chosen.
+    button.disabled = time < today;
     button.classList.toggle('today', time === today);
     button.classList.toggle('sel', time === picker.day.getTime());
     button.onclick = () => {
@@ -361,6 +401,22 @@ function renderPicker() {
     };
     grid.appendChild(button);
   }
+}
+
+/**
+ * Shows a warning and disables "Listo" when the chosen day or time is already over. The time
+ * box also gets a minimum while today is selected, so its arrows stop at the current time.
+ */
+function updatePastWarning() {
+  const time = picker.hasTime ? picker.time : null;
+  const past = isInPast(picker.day, time);
+  const now = new Date();
+  const isToday = picker.day.getTime() === startOfDay(now).getTime();
+
+  $('timeInput').min = isToday ? `${pad(now.getHours())}:${pad(now.getMinutes())}` : '';
+  $('pastWarning').hidden = !past;
+  $('pastWarning').textContent = time ? 'Esa hora ya ha pasado' : 'Ese día ya ha pasado';
+  $('confirmDueButton').disabled = past;
 }
 
 /**
@@ -538,13 +594,26 @@ function bindEvents() {
   };
   $('hasTimeInput').onchange = () => {
     picker.hasTime = $('hasTimeInput').checked;
+    // 9:00 is the usual default, but not when it has already passed today.
+    if (picker.hasTime && isInPast(picker.day, picker.time)) picker.time = suggestedTime(picker.day);
     renderPicker();
     if (picker.hasTime) $('timeInput').focus();
   };
-  $('timeInput').oninput = () => { picker.time = $('timeInput').value || '09:00'; };
+  $('timeInput').oninput = () => {
+    picker.time = $('timeInput').value || '09:00';
+    updatePastWarning();
+  };
   $('datePanelClose').onclick = closePicker;
   $('clearDueButton').onclick = () => applyDue(null);
-  $('confirmDueButton').onclick = () => applyDue(formatDue(picker.day, picker.hasTime ? picker.time : null));
+  $('confirmDueButton').onclick = () => {
+    const time = picker.hasTime ? picker.time : null;
+    // Checked again on click: the time may have passed while the picker was open.
+    if (isInPast(picker.day, time)) {
+      updatePastWarning();
+      return;
+    }
+    applyDue(formatDue(picker.day, time));
+  };
 
   // Typing a new task.
   const draft = $('draftInput');
