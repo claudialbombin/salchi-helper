@@ -9,6 +9,7 @@
  */
 'use strict';
 
+const fs = require('fs');
 const path = require('path');
 const { app, ipcMain, shell } = require('electron');
 
@@ -21,18 +22,55 @@ const { NotionTaskStore } = require('./stores/notion-task-store');
 const { LocalTaskStore } = require('./stores/local-task-store');
 const { FloatingWindow } = require('./floating-window');
 const { createTray } = require('./tray');
+const i18n = require('./i18n');
+const { t } = i18n;
 
 const POLL_INTERVAL_MS = 20_000;     // background refresh of the Notion list
 const STALE_AFTER_MS = 5_000;        // refresh when the list is opened if older than this
 const MAX_TITLE_LENGTH = 2_000;
 
-// Chromium takes its UI locale from the OS. Forcing Spanish keeps <input type="time"> in
-// 24-hour format and matches the language of the interface.
-app.commandLine.appendSwitch('lang', 'es-ES');
-
 const edition = resolveEdition();
 const config = new ConfigStore(app.getPath('userData'));
 const notion = new NotionClient(() => config.getToken());
+
+/**
+ * Adopts the language picked in the Windows installer, if any.
+ *
+ * The installer writes it to `resources/install-language.txt`. It is applied once per value,
+ * so installing again with a different choice switches the language, while a choice made
+ * later in the settings is not overwritten on every launch.
+ */
+function adoptInstallerLanguage() {
+  if (!app.isPackaged) return;
+  let code;
+  try {
+    code = fs.readFileSync(path.join(process.resourcesPath, 'install-language.txt'), 'utf8').trim();
+  } catch {
+    return; // no installer choice (Linux, or an older installer)
+  }
+  if (i18n.isSupported(code) && code !== config.get('installerLanguage')) {
+    config.set('language', code);
+    config.set('installerLanguage', code);
+  }
+}
+
+/**
+ * @param {string} code - A Salchi language code.
+ * @returns {string} The matching Chromium UI locale (used by date and time inputs).
+ */
+function chromiumLocale(code) {
+  return { 'zh-Hans': 'zh-CN', 'zh-Hant': 'zh-TW' }[code] || code;
+}
+
+// The language has to be known before Chromium starts: it decides how <input type="time">
+// is shown (24-hour clock or AM/PM). Until the user picks one, guess it from the system.
+config.load();
+adoptInstallerLanguage();
+i18n.setLanguage(config.get('language')
+  || i18n.bestLanguage([process.env.LC_ALL, process.env.LANG, Intl.DateTimeFormat().resolvedOptions().locale]
+    .filter(Boolean).map((locale) => locale.split('.')[0])));
+const startupLocale = chromiumLocale(i18n.language());
+app.commandLine.appendSwitch('lang', startupLocale);
 
 /** @type {import('./stores/task-store').TaskStore} */
 let store;
@@ -58,8 +96,62 @@ function pushState() {
     hasToken: !!config.getToken(),
     databaseId: config.get('databaseId') || '',
     autostart: autostart.isEnabled(),
+    language: i18n.language(),
+    chooseLanguage: floating.ui.chooseLanguage,
   });
   tray?.setPendingCount(store.tasks.length);
+}
+
+/**
+ * Sends the strings of the current language to the renderer, with the list of languages for
+ * the chooser and the text direction (right-to-left for Arabic, Hebrew, Persian and Urdu).
+ */
+function pushStrings() {
+  const language = i18n.language();
+  floating?.send('i18n', {
+    language,
+    dir: i18n.directionOf(language),
+    strings: i18n.strings(language),
+    languages: i18n.LANGUAGES,
+  });
+}
+
+/**
+ * Switches the interface language and remembers it.
+ *
+ * @param {unknown} code
+ */
+function setLanguage(code) {
+  if (!i18n.isSupported(code)) return;
+  config.set('language', code);
+
+  // Chromium reads its locale only at start-up, and the time field follows it (24-hour clock
+  // or AM/PM). When that has to change, restart Salchi; it comes back in the same place.
+  if (app.isPackaged && chromiumLocale(code) !== startupLocale) {
+    // An AppImage runs from a temporary mount that disappears when this process exits, so it
+    // must be restarted from the .AppImage file itself (its launcher adds the usual flags).
+    app.relaunch(process.env.APPIMAGE ? { execPath: process.env.APPIMAGE, args: [] } : undefined);
+    app.exit(0);
+    return;
+  }
+
+  i18n.setLanguage(code);
+  tray?.relabel();
+  pushStrings();
+
+  if (floating.ui.chooseLanguage) {
+    // First run: once the language is chosen, carry on with the usual start-up.
+    floating.closeLanguageChooser();
+    if (needsNotionSetup()) floating.openSettings();
+  }
+  pushState();
+}
+
+/**
+ * @returns {boolean} Whether the Notion edition still lacks a token or a page.
+ */
+function needsNotionSetup() {
+  return edition === Edition.NOTION && (!config.getToken() || !config.get('databaseId'));
 }
 
 /**
@@ -82,13 +174,13 @@ function showTaskMenu(id) {
   if (!task || store.isPending(id)) return;
 
   const template = [
-    { label: 'Hecho', click: () => store.complete(id) },
+    { label: t('task.done'), click: () => store.complete(id) },
     {
-      label: task.due ? 'Cambiar fecha…' : 'Ponerle fecha…',
+      label: task.due ? t('task.changeDateMenu') : t('task.addDateMenu'),
       click: () => floating.send('task-action', { action: 'pick-date', id }),
     },
   ];
-  if (task.due) template.push({ label: 'Quitar fecha', click: () => store.setDue(id, null) });
+  if (task.due) template.push({ label: t('task.removeDate'), click: () => store.setDue(id, null) });
   template.push(...store.extraMenuItems(task, { openExternal: (url) => shell.openExternal(url) }));
 
   floating.popupMenu(template);
@@ -104,7 +196,7 @@ async function saveNotionSettings(form) {
   try {
     const token = String(form.token || '').trim();
     if (token) config.setToken(token);
-    if (!config.getToken()) throw new Error('Pega el token de tu integración de Notion.');
+    if (!config.getToken()) throw new Error(t('errors.pasteToken'));
 
     const link = String(form.link || '').trim();
     if (link && extractNotionId(link) !== config.get('databaseId')) {
@@ -112,7 +204,7 @@ async function saveNotionSettings(form) {
       config.set('databaseId', databaseId);
       config.set('doneProperty', doneProperty);
     }
-    if (!config.get('databaseId')) throw new Error('Pega el enlace de una página de Notion.');
+    if (!config.get('databaseId')) throw new Error(t('errors.pasteLink'));
 
     store.error = null;
     floating.applyUiPatch({ settings: false });
@@ -127,7 +219,11 @@ async function saveNotionSettings(form) {
  * Registers every message the renderer may send.
  */
 function registerIpc() {
-  ipcMain.on('ready', pushState);
+  ipcMain.on('ready', () => {
+    pushStrings();
+    pushState();
+  });
+  ipcMain.on('set-language', (_event, code) => setLanguage(code));
   ipcMain.on('hover', (_event, inside) => floating.handleRendererHover(!!inside));
   ipcMain.on('drag-start', () => floating.startDrag());
   ipcMain.on('drag-end', () => floating.endDrag());
@@ -160,7 +256,9 @@ function registerIpc() {
  */
 function start() {
   app.setAppUserModelId('com.claudia.salchi');
-  config.load();
+
+  // Now that Electron is ready, the system's preferred languages give a better first guess.
+  if (!config.get('language')) i18n.setLanguage(i18n.bestLanguage(app.getPreferredSystemLanguages()));
 
   // Open at login by default, but only decide that once so the user's choice sticks.
   if (config.get('autostartSet') === undefined) {
@@ -182,8 +280,8 @@ function start() {
   floating.on('ui-change', pushState);
   floating.on('expand', () => store.refreshIfStale(STALE_AFTER_MS));
   floating.on('ready', () => {
-    const needsSetup = edition === Edition.NOTION && (!config.getToken() || !config.get('databaseId'));
-    if (needsSetup) floating.openSettings();
+    if (!config.get('language')) floating.openLanguageChooser();
+    else if (needsNotionSetup()) floating.openSettings();
     else if (floating.ui.pinned) floating.setExpanded(true);
     pushState();
   });
