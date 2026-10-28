@@ -23,6 +23,7 @@ const ALLOWED = new Set([
   'task-menu',
   'open-url',
   'set-autostart',
+  'set-language',
 ]);
 
 contextBridge.exposeInMainWorld('salchi', {
@@ -34,7 +35,15 @@ contextBridge.exposeInMainWorld('salchi', {
   onState: (callback) => ipcRenderer.on('state', (_event, state) => callback(state)),
 
   /**
-   * Subscribes to actions chosen in a native menu (e.g. "Ponerle fecha…").
+   * Subscribes to the interface strings, sent at start-up and whenever the language changes.
+   *
+   * @param {(bundle: { language: string, dir: 'ltr' | 'rtl', strings: Record<string, string>,
+   *   languages: { code: string, name: string, dir: string }[] }) => void} callback
+   */
+  onStrings: (callback) => ipcRenderer.on('i18n', (_event, bundle) => callback(bundle)),
+
+  /**
+   * Subscribes to actions chosen in a native menu (e.g. "Add a date…").
    *
    * @param {(action: { action: string, id: string }) => void} callback
    */
