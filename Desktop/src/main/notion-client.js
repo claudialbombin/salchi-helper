@@ -5,6 +5,8 @@
  */
 'use strict';
 
+const { t } = require('./i18n');
+
 const NOTION_API = 'https://api.notion.com/v1/';
 const NOTION_VERSION = '2022-06-28';
 const REQUEST_TIMEOUT_MS = 15_000;
@@ -70,7 +72,7 @@ class NotionClient {
    */
   async request(endpoint, method = 'GET', body) {
     const token = this.getToken();
-    if (!token) throw new Error('Falta conectar Notion: abre ⚙ ajustes.');
+    if (!token) throw new Error(t('errors.missingToken'));
 
     let response;
     try {
@@ -85,11 +87,11 @@ class NotionClient {
         signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
       });
     } catch {
-      throw new Error('Sin conexión con Notion.');
+      throw new Error(t('errors.offline'));
     }
 
     const json = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(json.message || 'Notion no responde.');
+    if (!response.ok) throw new Error(json.message || t('errors.notResponding'));
     return json;
   }
 
@@ -105,14 +107,14 @@ class NotionClient {
    */
   async resolveTaskDatabase(link) {
     const id = extractNotionId(link);
-    if (!id) throw new Error('No reconozco ese enlace de Notion.');
+    if (!id) throw new Error(t('errors.badLink'));
 
     let database;
     try {
       database = await this.request(`databases/${id}`);
     } catch {
       await this.request(`pages/${id}`).catch(() => {
-        throw new Error('No encuentro esa página. ¿Has añadido la integración en ••• → Conexiones?');
+        throw new Error(t('errors.pageNotFound'));
       });
       database = await this.findChildDatabase(id) || await this.createTaskDatabase(id);
     }
@@ -201,7 +203,7 @@ class NotionClient {
       const title = (titleProperty?.title || []).map((fragment) => fragment.plain_text).join('');
       return {
         id: page.id,
-        title: title || '(sin título)',
+        title: title || t('list.untitled'),
         due: properties[Property.DUE]?.date?.start || null,
         calendarUrl: properties[Property.CALENDAR_LINK]?.url || null,
       };
