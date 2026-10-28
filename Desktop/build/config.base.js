@@ -71,13 +71,13 @@ module.exports = function baseConfig(edition, artifactSuffix) {
       icon: 'build/icon.png',
       category: 'Utility',
       synopsis: 'A floating dachshund that keeps your to-do list in sight',
+      // electron-builder 25 takes the .desktop keys directly (a nested `entry` object ends up
+      // in the file as "entry=[object Object]").
       desktop: {
-        entry: {
-          Name: 'Salchi',
-          Comment: 'Your little dachshund for to-dos',
-          ...localizedComments(),
-          StartupWMClass: 'Salchi',
-        },
+        Name: 'Salchi',
+        Comment: 'Your little dachshund for to-dos',
+        ...localizedComments(),
+        StartupWMClass: 'Salchi',
       },
     },
     appImage: { artifactName: `Salchi-${artifactSuffix}.AppImage` },
