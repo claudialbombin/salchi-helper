@@ -27,7 +27,8 @@
 1. Double-click **`Salchi-Setup-con-Notion.exe`**.
 2. If Windows shows *"Windows protected your PC"*, click **More info → Run anyway**.
    This appears because the installer is not signed with a paid certificate; it only happens once.
-3. That's it: no wizard, no admin password. A desktop shortcut and a Start-menu entry are created.
+3. Pick Salchi's language in the menu that appears (yours is already selected) and press **OK**.
+4. That's it: no wizard, no admin password. A desktop shortcut and a Start-menu entry are created.
 
 > [!NOTE]
 > Salchi appears in the bottom-right corner and in the notification area, and starts with Windows from now on (you can turn that off in ⚙️ settings).
@@ -40,12 +41,17 @@
 3. On that page: **••• → Connections →** add your *Salchi* integration.
 4. Copy the page link (**••• → Copy link**).
 5. Salchi opens its ⚙️ settings on first launch. Paste the **token** and, in
-   **Enlace de la página de Notion** (*Notion page link*), the link. Press **Guardar** (*Save*).
+   **Link to the Notion page**, the link. Press **Save**.
    Salchi creates a *Salchi* task list inside the page.
 
 > [!TIP]
 > **Second computer?** Paste **the same token and the same page link**. Salchi finds the list that already exists
 > and both computers share it: what you add on one shows up on the other within 20 seconds.
+
+## 🌍 Language
+
+Salchi speaks 46 languages, from English (US and UK), Spanish and French to Japanese, Arabic and Ukrainian.
+The installer asks which one you want. You can change it at any time in ⚙️ **Settings → Language**.
 
 ## 🐕 Using Salchi
 
@@ -53,11 +59,11 @@
 | --- | --- |
 | 🖱️ Hover the dog | The list opens; move away and it folds back. |
 | ✋ Drag the dog or the list header | Moves Salchi anywhere, even flush against the screen edge. |
-| ⌨️ Type in **apuntar algo…** (*jot something down…*) and press <kbd>Enter</kbd> | Adds a task. |
+| ⌨️ Type in **jot something down…** and press <kbd>Enter</kbd> | Adds a task. |
 | ⭕ Click the circle | Ticks the task off. |
 | 📅 Next to the text box | Gives the next task a due date before you press <kbd>Enter</kbd>. |
 | 📅 Hover a task and click its calendar | Sets or changes that task's date. |
-| 🖱️ Right-click a task | Every action: **Hecho** (*done*), **Cambiar fecha…** (*change date*), **Quitar fecha** (*remove date*), **Abrir en Notion** (*open in Notion*) and **Abrir en Google Calendar**. |
+| 🖱️ Right-click a task | Every action: **Done**, **Change date…**, **Remove date**, **Open in Notion** and **Open in Google Calendar**. |
 | 📌 Pin | Keeps the list open. |
 | ⟳ Reload | Fetches the list again right away. |
 | ❗ A red badge on the dog | Something went wrong; hover to read the message. |
@@ -67,10 +73,10 @@
 
 <br>
 
-- Quick picks: **Hoy** (*today*), **Mañana** (*tomorrow*), **Sábado** (*Saturday*), **Lunes** (*Monday*), or any day on
+- Quick picks: **Today**, **Tomorrow**, **Saturday**, **Monday**, or any day on
   the calendar.
-- Tick **A una hora** (*at a time*) to add a time; press **Listo** (*done*) to confirm.
-- Under each task the date reads *hoy*, *mañana*, a weekday or a short date. It turns **red** when overdue and
+- Tick **At a set time** to add a time; press **Done** to confirm.
+- Under each task the date reads *today*, *tomorrow*, a weekday or a short date. It turns **red** when overdue and
   **orange** when due today.
 - Dated tasks go first, soonest first. Undated ones follow in the order you added them.
 
