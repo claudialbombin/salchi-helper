@@ -7,7 +7,11 @@
  *
  * Local UI state that never leaves the renderer:
  *   - the date picker (which task it is editing, the visible month…),
- *   - the due date chosen for the task that is being typed.
+ *   - the due date chosen for the task that is being typed,
+ *   - the language highlighted in the first-run chooser.
+ *
+ * Every visible text comes from the string table the main process sends (`onStrings`); the
+ * HTML only marks where each string goes with `data-i18n*` attributes.
  */
 'use strict';
 
@@ -26,6 +30,133 @@ const ICONS = {
   clock: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 4.6V8l2.3 1.5"/></svg>',
   link: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M6.6 9.4l2.8-2.8M7.2 4.6l1-1a2.8 2.8 0 0 1 4 4l-1 1M8.8 11.4l-1 1a2.8 2.8 0 0 1-4-4l1-1"/></svg>',
 };
+
+/* ========================================================================== Language */
+
+/** Strings of the current language, plus the list of languages for the chooser. */
+const i18n = {
+  language: 'en-US',
+  /** @type {Record<string, string>} */
+  strings: {},
+  /** @type {{ code: string, name: string, dir: string }[]} */
+  languages: [],
+};
+
+/**
+ * Translates a key, filling `{placeholders}` from `params`.
+ *
+ * @param {string} key
+ * @param {Record<string, string | number>} [params]
+ * @returns {string}
+ */
+function tr(key, params = {}) {
+  return (i18n.strings[key] ?? key).replace(/\{(\w+)\}/g, (match, name) => (name in params ? String(params[name]) : match));
+}
+
+/**
+ * @param {string} text
+ * @returns {string} The text with its first letter in upper case ("octubre" → "Octubre").
+ */
+function capitalize(text) {
+  return text.charAt(0).toLocaleUpperCase(i18n.language) + text.slice(1);
+}
+
+/**
+ * @returns {number} First day of the week for the current language: 0 = Sunday … 6 = Saturday.
+ */
+function firstDayOfWeek() {
+  try {
+    const locale = new Intl.Locale(i18n.language);
+    const info = locale.getWeekInfo?.() || locale.weekInfo;
+    if (info?.firstDay) return info.firstDay % 7; // Intl counts 1 = Monday … 7 = Sunday
+  } catch {
+    // Older engines: fall through.
+  }
+  return 1;
+}
+
+/**
+ * Applies a new string table: fills every marked element and redraws what depends on it.
+ *
+ * @param {{ language: string, dir: string, strings: Record<string, string>,
+ *   languages: { code: string, name: string, dir: string }[] }} bundle
+ */
+function applyStrings(bundle) {
+  Object.assign(i18n, bundle);
+  document.documentElement.lang = bundle.language;
+  document.documentElement.dir = bundle.dir;
+
+  document.querySelectorAll('[data-i18n]').forEach((element) => { element.textContent = tr(element.dataset.i18n); });
+  document.querySelectorAll('[data-i18n-title]').forEach((element) => { element.title = tr(element.dataset.i18nTitle); });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach((element) => {
+    element.placeholder = tr(element.dataset.i18nPlaceholder);
+  });
+
+  // Quick picks named after weekdays, in the language's own words.
+  const weekday = new Intl.DateTimeFormat(i18n.language, { weekday: 'long' });
+  document.querySelector('[data-pick="saturday"]').textContent = capitalize(weekday.format(nextWeekday(6)));
+  document.querySelector('[data-pick="monday"]').textContent = capitalize(weekday.format(nextWeekday(1)));
+
+  // "Create an internal integration at {link}…": the link is a real <a>, not text.
+  const step = $('notionStep1');
+  const [before, after = ''] = tr('settings.notionStep1').split('{link}');
+  const link = document.createElement('a');
+  link.href = 'https://www.notion.so/profile/integrations';
+  link.target = '_blank';
+  link.textContent = 'notion.so/profile/integrations';
+  step.replaceChildren(before, link, after);
+
+  // "…inside Salchi's {file} file.": the file name stands out in bold.
+  const [noteBefore, noteAfter = ''] = tr('settings.localNote').split('{file}');
+  const file = document.createElement('b');
+  file.textContent = 'tasks.json';
+  $('localNote').replaceChildren(noteBefore, file, noteAfter);
+
+  fillLanguageSelect();
+  renderLanguageList();
+  renderedListKey = ''; // dates and labels in the list depend on the language
+  if (state) render(state);
+  renderDraftDue();
+  if (picker.target) openPicker(picker.target);
+}
+
+/**
+ * Fills the language drop-down in the settings.
+ */
+function fillLanguageSelect() {
+  const select = $('languageSelect');
+  select.replaceChildren(...i18n.languages.map(({ code, name }) => {
+    const option = document.createElement('option');
+    option.value = code;
+    option.textContent = name;
+    return option;
+  }));
+  select.value = i18n.language;
+}
+
+/** Language highlighted in the first-run chooser; starts on the system's guess. */
+let chosenLanguage = null;
+
+/**
+ * Draws the first-run chooser: one button per language, written in that language.
+ */
+function renderLanguageList() {
+  const list = $('languageList');
+  const selected = chosenLanguage || i18n.language;
+  list.replaceChildren(...i18n.languages.map(({ code, name, dir }) => {
+    const button = textElement('button', code === selected ? 'sel' : '', name);
+    button.dir = dir;
+    button.lang = code;
+    button.setAttribute('role', 'option');
+    button.setAttribute('aria-selected', String(code === selected));
+    button.onclick = () => {
+      chosenLanguage = code;
+      renderLanguageList();
+    };
+    return button;
+  }));
+  list.querySelector('.sel')?.scrollIntoView({ block: 'center' });
+}
 
 /* ========================================================================== Dates
  * Due dates use Notion's string format:
@@ -108,7 +239,8 @@ function suggestedTime(day, now = new Date()) {
 }
 
 /**
- * Human-friendly label: "hoy", "mañana", "jueves", "30 oct", "3 ene 2027"… plus the time.
+ * Human-friendly label in the current language: "today", "tomorrow", "Thursday", "Oct 30",
+ * "Jan 3, 2027"… plus the time.
  *
  * @param {{ date: Date, hasTime: boolean }} due
  * @returns {string}
@@ -118,17 +250,21 @@ function dueLabel(due) {
   const days = dayDiff(due.date, now);
   let label;
 
-  if (days === 0) label = 'hoy';
-  else if (days === 1) label = 'mañana';
-  else if (days === -1) label = 'ayer';
-  else if (days >= 2 && days <= 6) label = new Intl.DateTimeFormat('es-ES', { weekday: 'long' }).format(due.date);
+  if (days === 0) label = tr('due.today');
+  else if (days === 1) label = tr('due.tomorrow');
+  else if (days === -1) label = tr('due.yesterday');
+  else if (days >= 2 && days <= 6) label = new Intl.DateTimeFormat(i18n.language, { weekday: 'long' }).format(due.date);
   else {
     const sameYear = due.date.getFullYear() === now.getFullYear();
     const options = sameYear ? { day: 'numeric', month: 'short' } : { day: 'numeric', month: 'short', year: 'numeric' };
-    label = new Intl.DateTimeFormat('es-ES', options).format(due.date).replace(/\./g, '');
+    label = new Intl.DateTimeFormat(i18n.language, options).format(due.date);
+    // Spanish abbreviations end in a dot ("30 oct."), which looks noisy in a tiny label.
+    if (i18n.language === 'es') label = label.replace(/\./g, '');
   }
 
-  if (due.hasTime) label += ` · ${pad(due.date.getHours())}:${pad(due.date.getMinutes())}`;
+  if (due.hasTime) {
+    label += ` · ${new Intl.DateTimeFormat(i18n.language, { hour: 'numeric', minute: '2-digit' }).format(due.date)}`;
+  }
   return label;
 }
 
@@ -166,8 +302,8 @@ function render(next) {
   $('spinner').classList.toggle('on', state.loading);
   $('pinButton').classList.toggle('active', state.pinned);
   $('autostartLabel').textContent = navigator.userAgent.includes('Windows')
-    ? 'Abrir al iniciar Windows'
-    : 'Abrir al iniciar sesión';
+    ? tr('settings.autostartWindows')
+    : tr('settings.autostart');
 
   if (state.settings && $('settings').hidden) fillSettings();
 
@@ -185,15 +321,18 @@ function render(next) {
 }
 
 /**
- * Shows exactly one of: the task list, the date picker or the settings.
+ * Shows exactly one of: the language chooser, the settings, the date picker or the task list.
  */
 function updateLayout() {
-  const pickerOpen = picker.target !== null && !state.settings;
-  $('settings').hidden = !state.settings;
+  const choosing = !!state.chooseLanguage;
+  const settings = state.settings && !choosing;
+  const pickerOpen = picker.target !== null && !settings && !choosing;
+  $('languagePanel').hidden = !choosing;
+  $('settings').hidden = !settings;
   $('datePanel').hidden = !pickerOpen;
-  $('taskList').hidden = state.settings || pickerOpen;
+  $('taskList').hidden = choosing || settings || pickerOpen;
   // While picking a date for an existing task there is nothing to type.
-  $('addBar').hidden = state.settings || (pickerOpen && picker.target !== NEW_TASK);
+  $('addBar').hidden = choosing || settings || (pickerOpen && picker.target !== NEW_TASK);
 }
 
 /**
@@ -204,7 +343,7 @@ function renderTaskList() {
   list.textContent = '';
 
   if (state.error) list.appendChild(textElement('div', 'err', state.error));
-  if (!state.tasks.length && !state.error) list.appendChild(textElement('div', 'empty', 'nada pendiente ✨'));
+  if (!state.tasks.length && !state.error) list.appendChild(textElement('div', 'empty', tr('list.empty')));
 
   for (const task of state.tasks) list.appendChild(taskRow(task));
 }
@@ -222,7 +361,7 @@ function taskRow(task) {
 
   const check = document.createElement('button');
   check.className = 'check' + (done ? ' done' : '');
-  check.title = 'Hecho';
+  check.title = tr('task.done');
   check.onclick = () => window.salchi.send('complete-task', task.id);
 
   const body = document.createElement('div');
@@ -236,14 +375,14 @@ function taskRow(task) {
 
   const dateButton = document.createElement('button');
   dateButton.className = 'rowdate';
-  dateButton.title = task.due ? 'Cambiar fecha' : 'Ponerle fecha';
+  dateButton.title = task.due ? tr('task.changeDate') : tr('task.addDate');
   dateButton.innerHTML = task.due ? ICONS.calendar : ICONS.calendarPlus;
   dateButton.onclick = () => openPicker(task.id);
   row.appendChild(dateButton);
 
   if (state.edition === 'local') {
     const remove = textElement('button', 'del', '✕');
-    remove.title = 'Borrar';
+    remove.title = tr('task.delete');
     remove.onclick = () => window.salchi.send('delete-task', task.id);
     row.appendChild(remove);
   }
@@ -273,10 +412,10 @@ function dueElement(task) {
 
   if (task.calendarUrl) {
     element.insertAdjacentHTML('beforeend', ICONS.link);
-    element.title = 'Está en tu Google Calendar (clic para abrirlo)';
+    element.title = tr('task.inCalendar');
     element.onclick = () => window.salchi.send('open-url', task.calendarUrl);
   } else {
-    element.title = 'Cambiar fecha';
+    element.title = tr('task.changeDate');
     element.onclick = () => openPicker(task.id);
   }
   return element;
@@ -322,7 +461,7 @@ let draftDue = null;
  */
 function openPicker(target) {
   let current = null;
-  let title = '¿Para cuándo?';
+  let title = tr('picker.title');
 
   if (target === NEW_TASK) {
     current = draftDue;
@@ -367,16 +506,22 @@ function renderPicker() {
   $('clearDueButton').hidden = !picker.canClear;
   updatePastWarning();
 
-  const monthName = new Intl.DateTimeFormat('es-ES', { month: 'long', year: 'numeric' }).format(picker.month);
-  $('monthLabel').textContent = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+  const monthName = new Intl.DateTimeFormat(i18n.language, { month: 'long', year: 'numeric' }).format(picker.month);
+  $('monthLabel').textContent = capitalize(monthName);
 
   const grid = $('calendarGrid');
   grid.textContent = '';
-  for (const weekday of ['L', 'M', 'X', 'J', 'V', 'S', 'D']) grid.appendChild(textElement('div', 'wd', weekday));
+  // Weekday initials, starting on the day the week starts in this language (Monday in most of
+  // Europe, Sunday in the US…). 4 January 2026 is a Sunday, so day i of that week has getDay() = i.
+  const weekStart = firstDayOfWeek();
+  const initial = new Intl.DateTimeFormat(i18n.language, { weekday: 'narrow' });
+  for (let i = 0; i < 7; i++) {
+    const weekday = (weekStart + i) % 7;
+    grid.appendChild(textElement('div', 'wd', initial.format(new Date(2026, 0, 4 + weekday))));
+  }
 
-  // Weeks start on Monday in Spain; getDay() counts from Sunday.
   const first = picker.month;
-  const leadingBlanks = (first.getDay() + 6) % 7;
+  const leadingBlanks = (first.getDay() - weekStart + 7) % 7;
   for (let i = 0; i < leadingBlanks; i++) grid.appendChild(document.createElement('span'));
 
   const daysInMonth = new Date(first.getFullYear(), first.getMonth() + 1, 0).getDate();
@@ -415,7 +560,7 @@ function updatePastWarning() {
 
   $('timeInput').min = isToday ? `${pad(now.getHours())}:${pad(now.getMinutes())}` : '';
   $('pastWarning').hidden = !past;
-  $('pastWarning').textContent = time ? 'Esa hora ya ha pasado' : 'Ese día ya ha pasado';
+  $('pastWarning').textContent = time ? tr('picker.pastTime') : tr('picker.pastDay');
   $('confirmDueButton').disabled = past;
 }
 
@@ -513,7 +658,7 @@ function submitDraft() {
  */
 function fillSettings() {
   $('tokenInput').value = '';
-  $('tokenInput').placeholder = state.hasToken ? 'Token guardado ✓ (pega otro para cambiarlo)' : 'Token (ntn_…)';
+  $('tokenInput').placeholder = state.hasToken ? tr('settings.tokenSaved') : tr('settings.tokenPlaceholder');
   $('linkInput').value = state.databaseId ? `https://www.notion.so/${state.databaseId}` : '';
   $('autostartInput').checked = state.autostart;
   $('settingsMessage').textContent = '';
@@ -528,7 +673,7 @@ async function saveSettings() {
   const message = $('settingsMessage');
   button.disabled = true;
   message.className = '';
-  message.textContent = 'Conectando…';
+  message.textContent = tr('settings.connecting');
 
   const result = await window.salchi.saveSettings({ token: $('tokenInput').value, link: $('linkInput').value });
 
@@ -629,6 +774,10 @@ function bindEvents() {
   // Settings.
   $('saveSettingsButton').onclick = saveSettings;
   $('autostartInput').onchange = () => window.salchi.send('set-autostart', $('autostartInput').checked);
+  $('languageSelect').onchange = () => window.salchi.send('set-language', $('languageSelect').value);
+
+  // First-run language chooser.
+  $('languageContinueButton').onclick = () => window.salchi.send('set-language', chosenLanguage || i18n.language);
 
   // Actions chosen in the native right-click menu.
   window.salchi.onTaskAction(({ action, id }) => {
@@ -637,6 +786,6 @@ function bindEvents() {
 }
 
 bindEvents();
-renderDraftDue();
+window.salchi.onStrings(applyStrings);
 window.salchi.onState(render);
 window.salchi.send('ready');
