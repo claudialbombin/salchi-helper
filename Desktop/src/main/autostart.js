@@ -9,6 +9,7 @@
 const fs = require('fs');
 const path = require('path');
 const { app } = require('electron');
+const { t } = require('./i18n');
 
 const IS_LINUX = process.platform === 'linux';
 
@@ -64,7 +65,7 @@ function setEnabled(enabled) {
     '[Desktop Entry]',
     'Type=Application',
     'Name=Salchi',
-    'Comment=Tu perrito salchicha de las notitas',
+    `Comment=${t('autostart.comment')}`,
     `Exec="${linuxLaunchCommand()}"`,
     'Icon=salchi',
     'X-GNOME-Autostart-enabled=true',
