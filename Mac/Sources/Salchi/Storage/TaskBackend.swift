@@ -35,14 +35,14 @@ protocol TaskBackend {
     func delete(_ id: String) async throws
 }
 
-/// Errors shown to the user. Messages are in Spanish because they appear in the UI as-is.
+/// Errors shown to the user, translated into the current language.
 enum TaskBackendError: LocalizedError {
     case missingToken
     case api(String)
 
     var errorDescription: String? {
         switch self {
-        case .missingToken: return "Falta conectar Notion: abre ⚙︎ ajustes."
+        case .missingToken: return tr("errors.missingToken")
         case .api(let message): return message
         }
     }
