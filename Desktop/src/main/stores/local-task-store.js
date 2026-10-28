@@ -11,6 +11,7 @@ const fs = require('fs');
 const path = require('path');
 const { TaskStore } = require('./task-store');
 const { googleCalendarTemplateUrl } = require('../due-dates');
+const { t } = require('../i18n');
 
 const HISTORY_LIMIT = 500;
 
@@ -101,9 +102,9 @@ class LocalTaskStore extends TaskStore {
   extraMenuItems(task, { openExternal }) {
     const items = [];
     if (task.due) {
-      items.push({ label: 'Añadir a Google Calendar', click: () => openExternal(googleCalendarTemplateUrl(task)) });
+      items.push({ label: t('task.addToGoogleCalendar'), click: () => openExternal(googleCalendarTemplateUrl(task)) });
     }
-    items.push({ type: 'separator' }, { label: 'Borrar', click: () => this.remove(task.id) });
+    items.push({ type: 'separator' }, { label: t('task.delete'), click: () => this.remove(task.id) });
     return items;
   }
 
