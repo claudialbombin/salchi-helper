@@ -1,26 +1,35 @@
 import ServiceManagement
 import SwiftUI
 
-/// Settings panel shown inside the card: Notion connection (Notion edition only) and
-/// "open at login".
+/// Settings panel shown inside the card: Notion connection (Notion edition only), language
+/// and "open at login".
 struct SettingsView: View {
     @ObservedObject var store: TodoStore
     @ObservedObject var ui: UIState
+    @ObservedObject private var l10n = L10n.shared
 
     @State private var token = Keychain.load() ?? ""
     @State private var databaseLink = AppConfig.databaseID
     @State private var launchAtLogin = SMAppService.mainApp.status == .enabled
 
-    /// Edition-specific section, "open at login" and the save button.
+    /// Edition-specific section, language, "open at login" and the save button.
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             if Edition.current == .notion {
                 notionSection
             } else {
-                Text("Ajustes").font(.system(size: 14, weight: .bold))
+                Text(tr("settings.title")).font(.system(size: 14, weight: .bold))
             }
 
-            Toggle("Abrir al iniciar sesión", isOn: $launchAtLogin)
+            // Changes apply at once: the whole interface redraws in the new language.
+            Picker(tr("settings.language"), selection: Binding(get: { l10n.language }, set: { l10n.choose($0) })) {
+                ForEach(l10n.languages) { language in
+                    Text(language.name).tag(language.code)
+                }
+            }
+            .font(.system(size: 12))
+
+            Toggle(tr("settings.autostart"), isOn: $launchAtLogin)
                 .font(.system(size: 12))
                 .onChange(of: launchAtLogin) { enabled in
                     if enabled {
@@ -31,7 +40,7 @@ struct SettingsView: View {
                 }
 
             if Edition.current == .local {
-                Text("Tus tareas se guardan solo en este Mac, en Library/Application Support/Salchi.")
+                Text(tr("settings.macLocalNote", ["path": "Library/Application Support/Salchi"]))
                     .font(.system(size: 11))
                     .foregroundColor(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -39,7 +48,7 @@ struct SettingsView: View {
 
             HStack {
                 Spacer()
-                Button(Edition.current == .notion ? "Guardar" : "Listo", action: save)
+                Button(Edition.current == .notion ? tr("settings.save") : tr("picker.confirm"), action: save)
                     .keyboardShortcut(.defaultAction)
             }
         }
@@ -48,16 +57,16 @@ struct SettingsView: View {
     /// Token and database fields, with short instructions.
     private var notionSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Conectar con Notion").font(.system(size: 14, weight: .bold))
-            Text("1. Crea una integración interna y copia su token.\n2. En tu lista de Salchi en Notion, ••• → Conexiones → añade la integración.")
+            Text(tr("settings.connectNotion")).font(.system(size: 14, weight: .bold))
+            Text(tr("settings.macNotionSteps"))
                 .font(.system(size: 11))
                 .foregroundColor(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
-            Link("Abrir integraciones de Notion ↗", destination: URL(string: "https://www.notion.so/profile/integrations")!)
+            Link("notion.so/profile/integrations ↗", destination: URL(string: "https://www.notion.so/profile/integrations")!)
                 .font(.system(size: 11, weight: .semibold))
-            SecureField("Token (ntn_…)", text: $token)
+            SecureField(tr("settings.tokenPlaceholder"), text: $token)
                 .textFieldStyle(.roundedBorder)
-            TextField("ID o enlace de la base de datos", text: $databaseLink)
+            TextField(tr("settings.macDatabasePlaceholder"), text: $databaseLink)
                 .textFieldStyle(.roundedBorder)
         }
     }
