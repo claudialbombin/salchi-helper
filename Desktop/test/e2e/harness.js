@@ -56,13 +56,16 @@ function runScenario(scenario) {
  * Intercepts context menus (menus shown with `popup`) so they can be inspected and
  * "clicked" without a real native menu. Other menus, like the tray's, are left alone.
  *
- * @returns {{ last: () => Electron.MenuItemConstructorOptions[], click: (label: string) => void }}
+ * @returns {{ last: () => Electron.MenuItemConstructorOptions[], built: () => Electron.MenuItemConstructorOptions[][],
+ *   click: (label: string) => void }}
  */
 function captureMenus() {
   const { Menu } = require('electron');
   const buildFromTemplate = Menu.buildFromTemplate.bind(Menu);
   let lastTemplate = [];
+  const built = [];
   Menu.buildFromTemplate = (template) => {
+    built.push(template);
     const menu = buildFromTemplate(template);
     menu.popup = (options) => {
       lastTemplate = template;
@@ -72,6 +75,8 @@ function captureMenus() {
   };
   return {
     last: () => lastTemplate,
+    /** Every menu built so far, popped up or not (the tray's included), newest last. */
+    built: () => built,
     click: (label) => lastTemplate.find((item) => item.label === label).click(),
   };
 }
