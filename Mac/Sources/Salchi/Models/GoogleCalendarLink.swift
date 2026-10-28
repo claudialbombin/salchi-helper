@@ -27,7 +27,7 @@ enum GoogleCalendarLink {
             URLQueryItem(name: "action", value: "TEMPLATE"),
             URLQueryItem(name: "text", value: "🐕 " + item.title),
             URLQueryItem(name: "dates", value: dates),
-            URLQueryItem(name: "details", value: "Apuntado en Salchi 🐕"),
+            URLQueryItem(name: "details", value: tr("task.calendarDetails")),
         ]
         return components?.url
     }
